@@ -106,58 +106,85 @@ def handle_missing_values(df, fraction_required_cols, fraction_required_rows):
 # In[7]:
 
 
+def remaining_nulls(df):
+    
+    df.regionidcity = df.regionidcity.fillna(value = df.regionidcity.mode()[0]) #fill regionidcity with mode
+    
+    df = df[df.lotsizesquarefeet < 3_000_000.0] # delete repeating values that are unlikely to be credible
+    
+    df.lotsizesquarefeet = df.lotsizesquarefeet.fillna(value = df.lotsizesquarefeet.median()) #fill nulls with medain for lotsizesquarefeet
+
+    #df.finishedsquarefeet12 = df.finishedsquarefeet12.fillna(value = df.finishedsquarefeet12.median()) # commented out due to high similairty with sqft column but has more nulls than sqft column
+
+    df.yearbuilt = df.yearbuilt.fillna(value = df.yearbuilt.mode()[0])
+    
+    df.regionidzip = df.regionidzip.fillna(value = df.regionidzip.mode()[0])
+    # delete anything with tax values that can be used in calculating target variable logerror
+    df = df.drop(columns = ['structuretaxvaluedollarcnt',  'taxvaluedollarcnt', 'landtaxvaluedollarcnt', 'taxamount', 'fullbathcnt', 'calculatedbathnbr'])
+
+    df.calculatedfinishedsquarefeet = df.calculatedfinishedsquarefeet.fillna(value = df.calculatedfinishedsquarefeet.median())
+    # drop remaining 63 nulls in censustractandblock
+    df = df.dropna()
+    return df
+
+
+# In[8]:
+
+
 def split_data(df):
     train_validate, test = train_test_split(df, test_size=.2, random_state=51)
     train, validate = train_test_split(train_validate, test_size=.3, random_state=51)
     return train, validate, test
 
 
-# In[8]:
+# In[17]:
 
 
 def prep_zillow(df, prop_req_cols, prop_req_rows):
-    
-    df = df.drop(columns = ['id', 'propertylandusedesc'])
+    # drop redundant ids, roomcnt appears inaccurate (lots of zeros in rows that have non-zero bed and bath), finishedsqft12 similar to sqft, assessmentyear is the same for all rows
+    df = df.drop(columns = ['id', 'propertylandusedesc', 'propertylandusetypeid', 'roomcnt', 'finishedsquarefeet12', 'assessmentyear'])
     df = df.sort_values('transactiondate').drop_duplicates('parcelid',keep='last')
     
-    df = df[(df.bathroomcnt < 11) & (df.bathroomcnt >= 1)]
-    df = df[(df.bedroomcnt < 11) & (df.bedroomcnt >= 1)]
+    df = df[(df.bathroomcnt <= 6) & (df.bathroomcnt >= 1)]
+    df = df[(df.bedroomcnt <= 6) & (df.bedroomcnt >= 1)]
     
-    df = handle_missing_values(df)
+    df = handle_missing_values(df, prop_req_cols, prop_req_rows)
+    df = remaining_nulls(df)
+    df.rename(columns = {'bedroomcnt': 'bed', 'bathroomcnt': 'bath', 'calculatedfinishedsquarefeet' : 'sqft', 'regionidzip':'zip', 'lotsizesquarefeet': 'lot_sqft'}, inplace = True)
     
     train, validate, test = split_data(df)
     
     return df, train, validate, test
 
 
-# In[ ]:
+# In[18]:
 
 
+df = new_zillow_data()
 
 
-
-# In[ ]:
-
+# In[19]:
 
 
+df, train, validate, test = prep_zillow(df, .66, .75)
 
 
-# In[ ]:
+# In[20]:
 
 
+df.head()
 
 
-
-# In[ ]:
-
+# In[21]:
 
 
+l = df[['sqft', 'finishedsquarefeet12']]
 
 
-# In[ ]:
+# In[22]:
 
 
-
+l['difference'] = 
 
 
 # In[ ]:
