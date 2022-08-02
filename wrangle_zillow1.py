@@ -175,18 +175,6 @@ df, train, validate, test = prep_zillow(df, .66, .75)
 df.head()
 
 
-# In[21]:
-
-
-l = df[['sqft', 'finishedsquarefeet12']]
-
-
-# In[22]:
-
-
-l['difference'] = 
-
-
 # In[ ]:
 
 
