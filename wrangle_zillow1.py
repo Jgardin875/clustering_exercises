@@ -20,6 +20,15 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
+# In[17]:
+
+
+print('df = wrangle_zillow1.get_zillow_data()')
+print('---OR---')
+print('df = wrangle_zillow1.new_zillow_data()')
+print('df, train, validate, test = wrangle_zillow1.prep_zillow(df, .66, .75)')
+
+
 # In[2]:
 
 
@@ -137,7 +146,7 @@ def split_data(df):
     return train, validate, test
 
 
-# In[17]:
+# In[12]:
 
 
 def prep_zillow(df, prop_req_cols, prop_req_rows):
@@ -145,8 +154,9 @@ def prep_zillow(df, prop_req_cols, prop_req_rows):
     df = df.drop(columns = ['id', 'propertylandusedesc', 'propertylandusetypeid', 'roomcnt', 'finishedsquarefeet12', 'assessmentyear'])
     df = df.sort_values('transactiondate').drop_duplicates('parcelid',keep='last')
     
-    df = df[(df.bathroomcnt <= 6) & (df.bathroomcnt >= 1)]
-    df = df[(df.bedroomcnt <= 6) & (df.bedroomcnt >= 1)]
+    #df = df[(df.bathroomcnt <= 6) & (df.bathroomcnt >= 1)]
+    #df = df[(df.bedroomcnt <= 6) & (df.bedroomcnt >= 1)]
+    # NOTE: Talked to shareholders. They won't drop any outliers. So i won't either.
     
     df = handle_missing_values(df, prop_req_cols, prop_req_rows)
     df = remaining_nulls(df)
@@ -155,24 +165,6 @@ def prep_zillow(df, prop_req_cols, prop_req_rows):
     train, validate, test = split_data(df)
     
     return df, train, validate, test
-
-
-# In[18]:
-
-
-df = new_zillow_data()
-
-
-# In[19]:
-
-
-df, train, validate, test = prep_zillow(df, .66, .75)
-
-
-# In[20]:
-
-
-df.head()
 
 
 # In[ ]:
